@@ -16,10 +16,10 @@ public class DemoApplication {
     @Bean
     CommandLineRunner init(ProdottoRepository repo) {
         return args -> {
-            repo.save(new Prodotto() {{
-                setNome("maglia inter");
-                setPrezzo(89.99);
-            }});
+            Prodotto p = new Prodotto();
+            p.setNome("maglia inter");
+            p.setPrezzo(89.99);
+            repo.save(p);
         };
     }
 }

@@ -1,33 +1,53 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Cartelle di output di Maven
+/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
+# File di configurazione IDE IntelliJ
+/.idea/
+/*.iml
 *.iws
-*.iml
-*.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# File temporanei di sistema
+.DS_Store
+Thumbs.db
 
-### VS Code ###
-.vscode/
+# File di log
+*.log
+
+# File di configurazione locale di IntelliJ
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+
+# Cartelle di dipendenze Maven (opzionale, di solito non si mettono in repo)
+/.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Directory di compilazione di IntelliJ
+/out/
+
+# File di configurazione di Eclipse (se mai usi anche Eclipse)
+.classpath
+.project
+.settings/
+
+# File di configurazione di gradle (se usi gradle)
+/.gradle/
+/build/
+
+# File generati dal sistema operativo
+*.class
+
+# File di cache di IntelliJ
+/.idea/caches/
+
+# File di configurazione Docker (se usi Docker)
+/docker-compose.override.yml
+/docker-compose.override.yaml
+
+# Altri file temporanei o di backup
+*~
+*.swp
+*.bak
+
