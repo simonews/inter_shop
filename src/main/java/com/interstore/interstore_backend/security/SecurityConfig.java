@@ -15,12 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtRequestFilter jwtRequestFilter;
     private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter,
                           CustomUserDetailsService userDetailsService) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtRequestFilter = jwtRequestFilter;
         this.userDetailsService = userDetailsService;
     }
 
@@ -29,11 +29,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()   //login e registrazione
-                        .anyRequest().authenticated()              //richiede JWT
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/prodotti/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/prodotti/**").hasRole("ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/prodotti/**").hasRole("ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/prodotti/**").hasRole("ADMIN")
+                        .requestMatchers("/api/test/user").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/api/test/admin").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                );
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

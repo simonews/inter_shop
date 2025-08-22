@@ -1,6 +1,7 @@
 package com.interstore.interstore_backend.entity;
 
 
+import com.interstore.interstore_backend.model.Role;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,13 +16,16 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
 
     public String getRole() {
-        return role;
+        return role.toString();
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
