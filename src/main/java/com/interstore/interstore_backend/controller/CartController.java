@@ -1,6 +1,6 @@
 package com.interstore.interstore_backend.controller;
 
-import com.interstore.interstore_backend.entity.Cart;
+import com.interstore.interstore_backend.dto.CartResponse;
 import com.interstore.interstore_backend.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +17,16 @@ public class CartController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Cart> getCartByUserId(@PathVariable Long userId) {
-        Optional<Cart> cart = cartService.getCartByUserId(userId);
+    public ResponseEntity<CartResponse> getCartByUserId(@PathVariable Long userId) {
+        Optional<CartResponse> cart = cartService.getCartResponseByUserId(userId);
         return cart.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Cart saveCart(@RequestBody Cart cart) {
-        return cartService.saveCart(cart);
+    public ResponseEntity<CartResponse> saveCart(@RequestBody CartResponse cartDto) {
+        CartResponse saved = cartService.saveCart(cartDto);
+        return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{cartId}")
@@ -35,33 +36,31 @@ public class CartController {
     }
 
     @PostMapping("/{userId}/add")
-    public ResponseEntity<Cart> addProductToCart(
+    public ResponseEntity<CartResponse> addProductToCart(
             @PathVariable Long userId,
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") int quantity) {
 
-        Cart updatedCart = cartService.addProductToCart(userId, productId, quantity);
+        CartResponse updatedCart = cartService.addProductToCart(userId, productId, quantity);
         return ResponseEntity.ok(updatedCart);
     }
 
     @DeleteMapping("/{userId}/remove/{productId}")
-    public ResponseEntity<Cart> removeProductFromCart(
+    public ResponseEntity<CartResponse> removeProductFromCart(
             @PathVariable Long userId,
             @PathVariable Long productId) {
 
-        Cart updatedCart = cartService.removeProductFromCart(userId, productId);
+        CartResponse updatedCart = cartService.removeProductFromCart(userId, productId);
         return ResponseEntity.ok(updatedCart);
     }
 
     @PutMapping("/{userId}/update/{productId}")
-    public ResponseEntity<Cart> updateProductQuantity(
+    public ResponseEntity<CartResponse> updateProductQuantity(
             @PathVariable Long userId,
             @PathVariable Long productId,
             @RequestParam int quantity) {
 
-        Cart updatedCart = cartService.updateProductQuantity(userId, productId, quantity);
+        CartResponse updatedCart = cartService.updateProductQuantity(userId, productId, quantity);
         return ResponseEntity.ok(updatedCart);
     }
-
 }
-

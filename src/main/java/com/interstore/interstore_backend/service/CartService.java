@@ -1,5 +1,7 @@
 package com.interstore.interstore_backend.service;
 
+import com.interstore.interstore_backend.dto.CartItemResponse;
+import com.interstore.interstore_backend.dto.CartResponse;
 import com.interstore.interstore_backend.entity.Cart;
 import com.interstore.interstore_backend.entity.CartItem;
 import com.interstore.interstore_backend.entity.Prodotto;
@@ -10,6 +12,8 @@ import com.interstore.interstore_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,12 +34,16 @@ public class CartService {
         this.userRepository = userRepository;
     }
 
-    public Optional<Cart> getCartByUserId(Long userId) {
-        return cartRepository.findByUserId(userId);
+    public Optional<CartResponse> getCartResponseByUserId(Long userId) {
+        return cartRepository.findByUserId(userId).map(this::toResponse);
     }
 
-    public Cart saveCart(Cart cart) {
-        return cartRepository.save(cart);
+    public CartResponse saveCart(CartResponse cartDto) {
+        Cart cart = new Cart();
+        cart.setUser(userRepository.findById(cartDto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Utente non trovato")));
+        Cart saved = cartRepository.save(cart);
+        return toResponse(saved);
     }
 
     @Transactional
@@ -44,13 +52,17 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addProductToCart(Long userId, Long productId, int quantity) {
+    public CartResponse addProductToCart(Long userId, Long productId, int quantity) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     newCart.setUser(userRepository.findById(userId).orElseThrow());
                     return cartRepository.save(newCart);
                 });
+
+        if (cart.getItems() == null) {
+            cart.setItems(new ArrayList<>());
+        }
 
         Prodotto product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
@@ -69,22 +81,22 @@ public class CartService {
             cart.getItems().add(newItem);
         }
 
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        return toResponse(savedCart);
     }
 
     @Transactional
-    public Cart removeProductFromCart(Long userId, Long productId) {
+    public CartResponse removeProductFromCart(Long userId, Long productId) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Carrello non trovato"));
 
         cart.getItems().removeIf(item -> item.getProdotto().getId().equals(productId));
 
-        return cartRepository.save(cart);
+        return toResponse(cartRepository.save(cart));
     }
 
-    // 🔹 Aggiorna quantità di un prodotto nel carrello
     @Transactional
-    public Cart updateProductQuantity(Long userId, Long productId, int quantity) {
+    public CartResponse updateProductQuantity(Long userId, Long productId, int quantity) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Carrello non trovato"));
 
@@ -94,6 +106,24 @@ public class CartService {
             }
         });
 
-        return cartRepository.save(cart);
+        return toResponse(cartRepository.save(cart));
+    }
+
+    private CartResponse toResponse(Cart cart) {
+        CartResponse dto = new CartResponse();
+        dto.setId(cart.getId());
+        dto.setUserId(cart.getUser().getId());
+
+        List<CartItemResponse> items = cart.getItems().stream().map(item -> {
+            CartItemResponse cir = new CartItemResponse();
+            cir.setId(item.getId());
+            cir.setProductId(item.getProdotto().getId());
+            cir.setProductName(item.getProdotto().getNome());
+            cir.setQuantity(item.getQuantity());
+            return cir;
+        }).toList();
+
+        dto.setItems(items);
+        return dto;
     }
 }

@@ -2,6 +2,7 @@ package com.interstore.interstore_backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,18 +30,33 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        //autenticazione
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/prodotti/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/prodotti/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/prodotti/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/prodotti/**").hasRole("ADMIN")
+
+                        //prodotti
+                        .requestMatchers(HttpMethod.GET, "/api/prodotti/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/prodotti/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/prodotti/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/prodotti/**").hasRole("ADMIN")
+
+                        //carrello:accessibile solo agli utenti autenticati
+                        .requestMatchers(HttpMethod.GET, "/api/cart/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/api/cart/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/cart/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/cart/**").hasRole("USER")
+
+                        //test
                         .requestMatchers("/api/test/user").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/api/test/admin").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 );
+
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
